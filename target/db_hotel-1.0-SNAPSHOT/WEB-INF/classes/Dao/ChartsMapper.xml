@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Dao.ChartsMapper">
+    <!--使用insert|update|delete|select标签写sql-->
+
+    <select id="getTotalPriceByYear" resultType="java.util.Map">
+        select year(createDate) as years,sum(payPrice) as money from t_checkin group by year(createDate)
+    </select>
+
+
+</mapper>
+
+
+

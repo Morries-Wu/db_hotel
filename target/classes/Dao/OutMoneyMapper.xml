@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Dao.OutMoneyMapper">
+    <resultMap id="BaseResultMap" type="Bean.Checkin">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="roomTypeId" jdbcType="INTEGER" property="roomtypeid" />
+        <result column="roomId" jdbcType="BIGINT" property="roomid" />
+        <result column="customerName" jdbcType="VARCHAR" property="customername" />
+        <result column="idCard" jdbcType="VARCHAR" property="idcard" />
+        <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="arriveDate" jdbcType="TIMESTAMP" property="arrivedate" />
+        <result column="leaveDate" jdbcType="TIMESTAMP" property="leavedate" />
+        <result column="payPrice" jdbcType="DECIMAL" property="payprice" />
+        <result column="status" jdbcType="INTEGER" property="status" />
+        <result column="remark" jdbcType="VARCHAR" property="remark" />
+    </resultMap>
+
+    <resultMap id="checkInRoomAndTypeResultMap" type="Bean.Checkin" extends="BaseResultMap">
+        <!-- 配置订单与房间关系 -->
+        <association property="room" javaType="Bean.Room">
+            <id column="id" property="id"/>
+            <result property="roomnum" column="roomnum"/>
+        </association>
+        <!-- 配置订单与房型关系 -->
+        <association property="roomType" javaType="Bean.RoomType">
+            <id property="id" column="id"/>
+            <result property="typename" column="typename"/>
+        </association>
+        <!-- 配置退款与订单关系 -->
+        <association property="outMoney" javaType="Bean.OutMoney">
+            <id property="id" column="id"/>
+            <result property="outPrice" column="outPrice"/>
+        </association>
+
+    </resultMap>
+
+    <select id="findCheckOutList" resultMap="checkInRoomAndTypeResultMap">
+        SELECT * FROM t_checkin t1
+        INNER JOIN t_room t2 ON t2.id=t1.roomId
+        INNER JOIN t_room_type t3 ON t3.id=t1.roomTypeId
+        INNER JOIN t_checkout t4 ON t4.checkInId=t1.id
+        INNER JOIN t_out_money t5 ON t5.outId=t4.id
+        <where>
+            <if test="customername!=null and customername!=''">
+                and t1.customername like concat('%',#{customername},'%')
+            </if>
+            <if test="idcard!=null and idcard!=''">
+                and t1.idcard like concat('%',#{idcard},'%')
+            </if>
+            <if test="phone!=null and phone!=''">
+                and t1.phone like concat('%',#{phone},'%')
+            </if>
+            <if test="roomtypeid!=null">
+                and t1.roomtypeid=#{roomtypeid}
+            </if>
+            <if test="status!=null">
+                and t1.status=#{status}
+            </if>
+            <if test="arrivedate!=null">
+                <![CDATA[and t1.arrivedate>=#{arrivedate}]]>
+            </if>
+            <if test="leavedate!=null">
+                <![CDATA[and t1.leavedate<=#{leavedate}]]>
+            </if>
+        </where>
+    </select>
+
+    <insert id="addCheckoutMoney">
+        insert into t_out_money (outId,createDate,outPrice) values(#{outId},#{createDate},#{outPrice})
+    </insert>
+
+    <select id="selectOutId" resultType="int">
+        select t2.id from t_checkin t1
+        JOIN t_checkout t2 on t2.checkInId=t1.id
+        where t1.id=#{id}
+    </select>
+
+
+
+</mapper>
+
+
+

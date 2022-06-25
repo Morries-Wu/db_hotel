@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Dao.MenuMapper">
+    <!--查询所有菜单列表-->
+    <select id="findMenuList" resultType="Bean.Menu">
+        select * from sys_menu
+    </select>
+
+    <select id="findMenuIdListByRoleId" resultType="int">
+        SELECT MID FROM sys_role_menu WHERE rid=#{roleId}
+    </select>
+
+    <!--如果参数类型是List集合,那么collection就必须小写list
+    如果参数是数组就填array
+    如果参数是Map集合,就填Map的键-->
+    <select id="findMenuByMenuId" resultType="Bean.Menu">
+        select * from sys_menu where id in
+        <foreach collection="list" item="menuIds" open="(" separator="," close=")">
+            #{menuIds}
+        </foreach>
+    </select>
+
+    <select id="findMenuListByPage" resultType="Bean.Menu">
+        select * from sys_menu
+        <where>
+            <if test="id!=null">
+                and id=#{id} or pid=#{id}
+            </if>
+        </where>
+        order by id
+    </select>
+
+    <insert id="addMenu">
+        insert into sys_menu(pid,title,href,spread,target,icon)
+        values(#{pid},#{title},#{href},#{spread},#{target},#{icon})
+    </insert>
+
+    <update id="updateMenu">
+        update sys_menu
+        <set>
+            <if test="pid!=null">
+                pid=#{pid},
+            </if>
+            <if test="spread!=null">
+                spread=#{spread},
+            </if>
+            <if test="title!=null and title!=''">
+                title=#{title},
+            </if>
+            <if test="href!=null and href!=''">
+                href=#{href},
+            </if>
+            <if test="target!=null and target!=''">
+                target=#{target},
+            </if>
+            <if test="icon!=null and icon!=''">
+                icon=#{icon},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from sys_menu where id=#{id}
+    </delete>
+
+    <select id="getMenuCountByMenuId" resultType="int">
+        select count(1) from sys_menu where pid=#{id}
+    </select>
+
+    <select id="findMenuListByEmployeeId" resultType="Bean.Menu">
+        SELECT DISTINCT t1.* FROM sys_menu t1
+        INNER JOIN sys_role_menu t2 ON t2.mid=t1.id
+        INNER JOIN sys_role_employee t3 ON t3.rid=t2.rid
+        WHERE t3.eid=#{employeeId}
+    </select>
+
+
+
+
+
+</mapper>
+
+
+

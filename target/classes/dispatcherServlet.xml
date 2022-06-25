@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--springmvc的配置文件:声明controller,视图解析器等web开发中的对象-->
+    <context:component-scan base-package="Controller"/>
+
+    <!--声明视图解析器,帮助处理视图-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!--前缀:指定视图文件的路径-->
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <!--后缀:视图文件的扩展名-->
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- 加载静态资源 -->
+    <mvc:resources mapping="/statics/**" location="/statics/"/>
+
+    <!--声明注解驱动:
+    作用
+    1、创建HttpMessageConverter接口的七个实现对象,处理Java对象到json的转换
+    2、解决静态资源中,动态资源访问失败的问题
+    default-servlet-handler和@RequestMapping使用有冲突-->
+    <mvc:annotation-driven />
+
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!--拦截所有以admin开头访问的路径-->
+            <mvc:mapping path="/admin/**"/>
+            <!--排除员工登录的访问路径-->
+            <mvc:exclude-mapping path="/admin/employee/login"/>
+            <mvc:exclude-mapping path="/admin/login.html"/>
+            <!--注入拦截器-->
+            <bean class="interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!-- 配置文件解析器对象，要求id名称必须是multipartResolver -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 设置文件上传限制大小为10M -->
+        <property name="maxUploadSize" value="10485760"/>
+    </bean>
+
+
+</beans>
